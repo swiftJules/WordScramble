@@ -14,10 +14,13 @@ struct ContentView: View {
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var score = 0
     
     var body: some View {
         NavigationView {
             List {
+                Text("\(score)")
+
                 Section {
                     TextField("Enter your word", text: $newWord)
                         .autocapitalization(.none)
@@ -44,12 +47,25 @@ struct ContentView: View {
             } message: {
                 Text(errorMessage)
             }
+            .toolbar {
+                Button {
+                    usedWords = []
+                    score = 0
+                    startGame()
+                } label: {
+                    Text("Start")
+                }
+            }
         }
     }
     
     func addNewWord() {
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard answer.count > 0 else { return }
+        
+        guard answer.count > 2 else {
+            wordError(title: "Too short", message: "Words must be atleast 3 letters")
+            return
+        }
         
         guard isOriginal(word: answer) else {
             wordError(title: "Word used already", message: "Be more original")
@@ -65,6 +81,8 @@ struct ContentView: View {
             wordError(title: "Word not recognized", message: "Word is made up")
             return
         }
+        
+        score += answer.count
         
         withAnimation {
             usedWords.insert(answer, at: 0)
